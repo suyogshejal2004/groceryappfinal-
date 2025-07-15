@@ -1,6 +1,6 @@
 import { Customer, DeliveryPartner } from "../../models/index.js";
 
-const  updateUser = async (req, reply) => {
+const updateUser = async (req, reply) => {
   try {
     const { userId } = req.user;
     const updateData = req.body;
@@ -29,8 +29,12 @@ const  updateUser = async (req, reply) => {
     if (!updatedUser) {
       return reply.status(404).send({ message: "User not found" });
     }
-    return reply.send({ message: "User updated successfully", user: updatedUser });
+    return reply.send({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     return reply.status(500).send({ message: "Failed to update user", error });
   }
 };
+export default updateUser ;

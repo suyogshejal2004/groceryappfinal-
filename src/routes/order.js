@@ -7,7 +7,7 @@ import {
 } from "../controllers/order/order.js";
 import verifyToken from "../middleware/auth.js";
 
-export const orderRoutes = async (fastify, options) => {
+ const orderRoutes = async (fastify, options) => {
   fastify.addHook("preHandler", async (request, reply) => {
     const isAuthenticated = await verifyToken(request, reply);
     if (!isAuthenticated) {
@@ -21,3 +21,4 @@ export const orderRoutes = async (fastify, options) => {
   fastify.post("/order/orderId/confirm", confirmOrder);
   fastify.get("/order/orderId", getOrderById);
 };
+export default orderRoutes;
