@@ -4,11 +4,14 @@ import fastify from "fastify";
 import { PORT } from "./src/config/config.js";
 import fastifySocketIO from "fastify-socket.io";
 import { registerRoutes } from "./src/routes/index.js";
+import { buildAdminRouter, admin } from "./src/config/setup.js";
+import AdminJSFastify from "@adminjs/fastify";
 
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
     const app = fastify();
+
     app.register(fastifySocketIO, {
       cors: {
         origin: "*",
@@ -17,17 +20,20 @@ const start = async () => {
       pingTimeout: 5000,
       transports: ["websocket"],
     });
+
     await registerRoutes(app);
+    await buildAdminRouter(app);
 
     app.listen({ port: PORT, host: "0.0.0.0" }, (err, addr) => {
       if (err) {
         console.error("Server error:", err);
       } else {
-        console.log(`Grocery app running on http://localhost:${PORT}`);
+        console.log(
+          `Grocery app running on http://localhost:${PORT}${admin.options.rootPath}`
+        );
       }
     });
 
-    // Move Socket.IO setup inside the `try` block
     app.ready().then(() => {
       app.io.on("connection", (socket) => {
         console.log("A User Connected ✅");

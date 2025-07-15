@@ -37,7 +37,7 @@ export const createOrder = async (req, reply) => {
     const savedOrder = await newOrder.save();
     return reply.status(201).send(savedOrder);
   } catch (error) {
-    console.log(err);
+    console.log(error);
     return reply.status(500).send({ message: "Failed to create order", error });
   }
 };
