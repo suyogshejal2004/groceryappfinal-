@@ -1,10 +1,9 @@
 import AdminJS from "adminjs";
 import AdminJSFastify from "@adminjs/fastify";
-
 import * as AdminJSMongoose from "@adminjs/mongoose";
 import * as Models from "../models/index.js";
 import { authenticate, COOKIE_PASSWORD, sessionStore } from "./config.js";
-import { dark,light,noSidebar } from "@adminjs/themes";
+import { dark, light, noSidebar } from "@adminjs/themes";
 
 // Register the mongoose adapter
 AdminJS.registerAdapter(AdminJSMongoose);
@@ -14,21 +13,21 @@ export const admin = new AdminJS({
   resources: [
     {
       resource: Models.Customer,
-      Options: {
+      options: { // Note: 'options' should be lowercase
         listProperties: ["phone", "role", "isActivated"],
         filterProperties: ["phone", "role"],
       },
     },
     {
       resource: Models.DeliveryPartner,
-      Options: {
+      options: { // Note: 'options' should be lowercase
         listProperties: ["email", "role", "isActivated"],
         filterProperties: ["email", "role"],
       },
     },
     {
       resource: Models.Admin,
-      Options: {
+      options: { // Note: 'options' should be lowercase
         listProperties: ["email", "role", "isActivated"],
         filterProperties: ["email", "role"],
       },
@@ -44,6 +43,7 @@ export const admin = new AdminJS({
     withMadeWithLove: false,
   },
 });
+
 export const buildAdminRouter = async (app) => {
   await AdminJSFastify.buildAuthenticatedRouter(
     admin,
@@ -58,9 +58,11 @@ export const buildAdminRouter = async (app) => {
       saveUninitialized: true,
       secret: COOKIE_PASSWORD,
       cookie: {
-        httpOnly: process.env.NODE_ENV === "production",
+        // This is the corrected part
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: 'lax' // Add this line
       },
     }
-  )
-}
+  );
+};
