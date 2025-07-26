@@ -18,12 +18,28 @@ sessionStore.on("error", (error) => {
 });
 
 export const authenticate = async (email, password) => {
+  // Yeh log batayega ki login ki koshish shuru hui
+  console.log(`[LOGIN ATTEMPT] Email: ${email}`);
+
   if (email && password) {
     const user = await Admin.findOne({ email });
-    if (!user) return null;
-    if (user.password === password) {
-      return Promise.resolve({ email: user.email, role: user.role });
+    
+    if (!user) {
+      // Yeh log batayega ki user nahi mila
+      console.log("[LOGIN FAILED] User not found in database.");
+      return null;
     }
-  }
+
+    if (user.password === password) {
+      // Yeh log batayega ki login safal hua
+      console.log("[LOGIN SUCCESS] User authenticated! Preparing to redirect...");
+      return Promise.resolve(user);
+    } else {
+      // Yeh log batayega ki password galat hai
+      console.log("[LOGIN FAILED] Incorrect password.");
+      return null;
+    }
+  } 
+
   return null;
 };
