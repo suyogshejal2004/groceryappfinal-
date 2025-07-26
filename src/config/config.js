@@ -18,16 +18,16 @@ sessionStore.on("error", (error) => {
 export const authenticate = async (email, password) => {
   //creating admin frist time
 
-  if (email && password) {
+ /* if (email && password) {
     if ( email === "suyogshejal2004@gmail.com" && password === "Suyog@2004") {
       return Promise.resolve({ email: email, password: password }); // you can handle invalid password here
     } else {
       return null; // you can handle invalid password here
     }
-  }
+  } */
 // ok created testing 
   //UNcomment this when creadet admin panel manually in databse
-  /*if (email && password) {
+  if (email && password) {
     const user = await Admin.findOne({ email });
     if (!user) {
       return null; // you can handle invalid user here
@@ -37,7 +37,7 @@ export const authenticate = async (email, password) => {
     } else {
       return null; // you can handle invalid password here
     }
-  } */
+  } 
 
   return null;
 };
