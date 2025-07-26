@@ -18,7 +18,7 @@ sessionStore.on("error", (error) => {
 export const authenticate = async (email, password) => {
   //creating admin frist time
 
-  f (email && password) {
+  if (email && password) {
     if ( email === "suyogshejal2004@gmail.com" && password === "Suyog@2004") {
       return Promise.resolve({ email: email, password: password }); // you can handle invalid password here
     } else {
