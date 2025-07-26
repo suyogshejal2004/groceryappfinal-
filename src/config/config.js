@@ -25,7 +25,7 @@ export const authenticate = async (email, password) => {
       return null; // you can handle invalid password here
     }
   }
-
+// ok created testing 
   //UNcomment this when creadet admin panel manually in databse
   /*if (email && password) {
     const user = await Admin.findOne({ email });
