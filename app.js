@@ -10,7 +10,11 @@ import AdminJSFastify from "@adminjs/fastify";
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
-    const app = fastify();
+    
+    // This is the only change we are making
+    const app = fastify({
+      trustProxy: true, // This line tells the server to trust Render
+    });
 
     app.register(fastifySocketIO, {
       cors: {
