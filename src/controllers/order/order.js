@@ -4,15 +4,45 @@ import { Customer, DeliveryPartner } from "../../models/user.js";
 
 export const createOrder = async (req, reply) => {
   try {
-    const { userId } = req.user;
-    const { items, branch, totalPrice } = req.body;
+    const { userId } = req.user; // Extracted from JWT token
+    if (!userId) {
+      return reply.status(401).send({ message: "Unauthorized: No user ID found in token" });
+    }
+
+    const { items, branch, totalPrice, deliveryLocation } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return reply.status(400).send({ message: "Items are required" });
+    }
+    if (!branch) {
+      return reply.status(400).send({ message: "Branch ID is required" });
+    }
+    if (!totalPrice || isNaN(totalPrice)) {
+      return reply.status(400).send({ message: "Valid total price is required" });
+    }
 
     const customerData = await Customer.findById(userId);
-    const branchData = await Branch.findById(branch);
-
     if (!customerData) {
       return reply.status(404).send({ message: "Customer not found" });
     }
+
+    const branchData = await Branch.findById(branch);
+    if (!branchData) {
+      return reply.status(404).send({ message: "Branch not found" });
+    }
+
+    // Use client-provided deliveryLocation if customer liveLocation is missing
+    const useLiveLocation = customerData.liveLocation && customerData.liveLocation.latitude && customerData.liveLocation.longitude;
+    const finalDeliveryLocation = useLiveLocation
+      ? {
+          latitude: customerData.liveLocation.latitude,
+          longitude: customerData.liveLocation.longitude,
+          address: customerData.address || "No address available",
+        }
+      : {
+          latitude: deliveryLocation.latitude,
+          longitude: deliveryLocation.longitude,
+          address: deliveryLocation.address || "No address available",
+        };
 
     const newOrder = new Order({
       customer: userId,
@@ -23,22 +53,19 @@ export const createOrder = async (req, reply) => {
       })),
       branch,
       totalPrice,
-      deliveryLocation: {
-        latitude: customerData.liveLocation.latitude,
-        longitude: customerData.liveLocation.longitude,
-        address: customerData.address || "No address available",
-      },
+      deliveryLocation: finalDeliveryLocation,
       pickupLocation: {
         latitude: branchData.location.latitude,
         longitude: branchData.location.longitude,
         address: branchData.address || "No address available",
       },
     });
+
     const savedOrder = await newOrder.save();
     return reply.status(201).send(savedOrder);
   } catch (error) {
-    console.log(error);
-    return reply.status(500).send({ message: "Failed to create order", error });
+    console.error(`[Error creating order] ${error.stack}`); // Log full stack trace
+    return reply.status(500).send({ message: "Failed to create order", error: error.message });
   }
 };
 
