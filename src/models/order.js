@@ -56,14 +56,17 @@ const orderSchema = new mongoose.Schema({
 orderSchema.pre('save', async function (next) {
   try {
     if (this.isNew) {
+      // 🔹 Updated to match Counter schema (name + sequence_value)
       const counter = await Counter.findOneAndUpdate(
-        { _id: 'orderId' },
-        { $inc: { seq: 1 } },
+        { name: 'orderId' },                   // match by name
+        { $inc: { sequence_value: 1 } },        // increment correct field
         { new: true, upsert: true }
       );
-      this.orderId = `ORDR${counter.seq.toString().padStart(5, '0')}`;
+
+      this.orderId = `ORDR${counter.sequence_value.toString().padStart(5, '0')}`;
       console.log('[orderSchema] Generated orderId:', this.orderId);
     }
+
     if (!Array.isArray(this.items)) {
       console.warn('[orderSchema] Items is not an array for order:', {
         orderId: this.orderId,
@@ -82,9 +85,15 @@ orderSchema.pre('save', async function (next) {
         }
       }
     }
-    if (!this.deliveryLocation.address && this.deliveryLocation.latitude && this.deliveryLocation.longitude) {
+
+    if (
+      !this.deliveryLocation.address &&
+      this.deliveryLocation.latitude &&
+      this.deliveryLocation.longitude
+    ) {
       this.deliveryLocation.address = `Lat: ${this.deliveryLocation.latitude}, Lon: ${this.deliveryLocation.longitude}`;
     }
+
     this.updatedAt = Date.now();
     next();
   } catch (error) {
